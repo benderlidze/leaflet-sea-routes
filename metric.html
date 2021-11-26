@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"> 
+	<meta name="lookport" content="width=device-width, initial-scale=1.0">   
+<title></title>
+<meta property="og:title" content="Versstachi - Web Design Frontend Developers" />  
+<meta property="og:image" content="img/Ogg.png" /> 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" /> 
+    <link rel="stylesheet" type="text/css" href="css/leaflet-openweathermap.css" />
+<link rel="stylesheet" href="css/L.Control.Sidebar.css" /> 
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css"> -->
+<link rel="stylesheet" href="css/main.css" /> 
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.5/leaflet-routing-machine.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/perliedman-leaflet-control-geocoder/1.5.5/Control.Geocoder.min.css" /> -->
+ 
+</head> 
+<body>  
+<div class="metric_content">
+
+
+    <div class="main_row">
+ 
+        <div class="sidebar_panel">
+
+            <!-- left_panel -->
+            <div class="left_panel">
+                <div class="top_ico">
+                    <a href="">
+                        <img src="img/ship-ico.svg" alt="">
+                    </a>
+                </div>
+                <div class="center_ico">
+                    <a href="/" class="left_panel__link voyage_link_map active">
+                        <img src="img/map-ico.svg" alt="">
+                    </a>
+                    <a href="#" class="voyage_link_open left_panel__link"  onclick="lonkHoverActive(this)">
+                        <img src="img/book-ico.svg" alt="">
+                    </a>
+                </div>
+                <div class="bottom_ico">
+                    <a href="#" class="left_panel__link"  onclick="lonkHoverActive(this)">
+                        <img src="img/user-ico.svg" alt="">
+                    </a>
+                </div>
+            </div>
+            <!-- left_panel -->
+            <!-- sidebar -->
+            <div id="sidebar"  class="sidebar">
+                <div class="vessel_img">
+                    <img src="img/dashbord_vessel.png" alt="">
+                </div> 
+                  
+                  <div class="sidebar__content_section">
+                    <div class="tabs__content active">
+                        <div class="sidebar__overview__head_panel">
+                            <h2>MSC SEASIDE</h2>
+                            <div class="head_panel_label">Under way</div>
+                        </div>
+                        <div class="sidebar__vessel_info_type">
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">IMO</div>
+                                <div class="sidebar__vessel_info_text">9745366</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">MMSI</div>
+                                <div class="sidebar__vessel_info_text">248392000</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Type</div>
+                                <div class="sidebar__vessel_info_text">Cruise Liner</div>
+                            </div>
+                        </div>
+                        <div class="sidebar__vessel_info_box">
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Position</div>
+                                <div class="sidebar__vessel_info_text">41°24'12.2"N 2°10'26.5"E</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Time on board</div>
+                                <div class="sidebar__vessel_info_text">04 Aug 2021, 07:15 (UTC +06:00)</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Next port</div>
+                                <div class="sidebar__vessel_info_text">Taranto <span>IT TAR</span></div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">ETA announced</div>
+                                <div class="sidebar__vessel_info_text">07 Aug 2021, 20:00 <span>IT TAR</span></div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">ETA forecast</div>
+                                <div class="sidebar__vessel_info_text">07 Aug 2021, 20:00 <span>IT TAR</span></div>
+                            </div>
+                        </div>
+                        <div class="sidebar__vessel_info_box">
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Speed</div>
+                                <div class="sidebar__vessel_info_text">13.1kts</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Draft</div>
+                                <div class="sidebar__vessel_info_text">11.2m</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Heading</div>
+                                <div class="sidebar__vessel_info_text">313,0°</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Fuel consumption</div>
+                                <div class="sidebar__vessel_info_text">20t</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Hull & machinery perforrmance</div>
+                                <div class="sidebar__vessel_info_text">70%</div>
+                            </div>
+                        </div>
+                        <div class="sidebar__vessel_info_box">
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Cargo mass</div>
+                                <div class="sidebar__vessel_info_text">20 kg</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Loading condition</div>
+                                <div class="sidebar__vessel_info_text">In Ballast</div>
+                            </div> 
+                        </div> 
+                    </div>
+                    <div  class="tabs__content tabs__itinerary"> 
+                        <div class="vessel_progress_bar">
+                            <div class="country_name">
+                                <div class="country_start"><img src="img/Catanzaro.png" alt="">Catanzaro</div>
+                                <div class="country_end"><img src="img/Catanzaro.png" alt="">Taranto</div>
+                            </div>
+                            <input type="range" value="25" min="0" max="100" class="vessel_progress_bar_input" />
+                            <div class="vessel_progress_box">
+                                <div class="vessel_progress_sector">
+                                    <div class="vessel_county_progress"><img src="img/flag-ico.png" alt="">Italy</div>
+                                </div>
+                                <div class="vessel_progress_sector">
+                                    <div class="vessel_county_progress">Neutral</div>
+                                </div>
+                                <div class="vessel_progress_sector">
+                                    <div class="vessel_county_progress"><img src="img/flag-ico.png" alt="">Italy</div>
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="sidebar__vessel_info_box">
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Position</div>
+                                <div class="sidebar__vessel_info_text">41°24'12.2"N 2°10'26.5"E</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Time on board</div>
+                                <div class="sidebar__vessel_info_text">04 Aug 2021, 07:15 (UTC +06:00)</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Next port</div>
+                                <div class="sidebar__vessel_info_text">Taranto</div>
+                            </div>
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Next port</div>
+                                <div class="sidebar__vessel_info_text">07 Aug 2021, 20:00</div>
+                            </div>
+                        </div>
+                        <div class="sidebar__vessel_info_box">
+                            <div class="sidebar__vessel_info_col">
+                                <div class="sidebar__vessel_info_label">Position</div> 
+                            </div> 
+                            <div class="sidebar__vessel_info_col_weather">
+                                <div class="sidebar__vessel_info_weather sidebar__vessel_info_temp">+20°</div> 
+                                <div class="sidebar__vessel_info_weather">
+                                    <div class="weather_ico"><img src="img/weather-icos/sun-ico.svg" alt=""></div>
+                                    <div class="weather_value">Stormy</div>
+                                </div> 
+                                <div class="sidebar__vessel_info_weather">
+                                    <div class="weather_ico"><img src="img/weather-icos/windy-ico.svg" alt=""></div>
+                                    <div class="weather_value">10m/s</div>
+                                </div> 
+                                <div class="sidebar__vessel_info_weather">
+                                    <div class="weather_ico"><img src="img/weather-icos/rain-ico.svg" alt=""></div>
+                                    <div class="weather_value">66%</div>
+                                </div> 
+                                <div class="sidebar__vessel_info_weather">
+                                    <div class="weather_ico"><img src="img/weather-icos/cloudy-ico.svg" alt=""></div>
+                                    <div class="weather_value">11%</div>
+                                </div> 
+                                <div class="sidebar__vessel_info_weather">
+                                    <div class="weather_ico"><img src="img/weather-icos/visible-ico.svg" alt=""></div>
+                                    <div class="weather_value">10km</div>
+                                </div> 
+                                <div class="sidebar__vessel_info_weather">
+                                    <div class="weather_ico"><img src="img/weather-icos/horizontal-ico.svg" alt=""></div>
+                                    <div class="weather_value">600m</div>
+                                </div> 
+                            </div> 
+                        </div>
+                    </div>
+                    <div id="tab3" class="tabs__content notification_tabs">
+                        <div class="sidebar__vessel_notification notification_box">
+                            <div class="sidebar__vessel_notification_text">
+                                <div class="sidebar__vessel_notification_date">20.07.21 at 09:00</div>
+                                <div class="sidebar__vessel_notification_text">Storm near Palermo may affect the vessel</div>
+                            </div>
+                            <div class="sidebar__vessel_notification_status">
+                                <img src="img/thunder-circle.svg" alt="">
+                            </div>
+                        </div>
+                        <div class="sidebar__vessel_notification notification_box">
+                            <div class="sidebar__vessel_notification_text">
+                                <div class="sidebar__vessel_notification_date">20.07.21 at 09:00</div>
+                                <div class="sidebar__vessel_notification_text">Storm near Palermo may affect the vessel</div>
+                            </div>
+                            <div class="sidebar__vessel_notification_status">
+                                <img src="img/warning-circle.svg" alt="">
+                            </div>
+                        </div>
+                        <div class="sidebar__vessel_notification notification_box">
+                            <div class="sidebar__vessel_notification_text">
+                                <div class="sidebar__vessel_notification_date">20.07.21 at 09:00</div>
+                                <div class="sidebar__vessel_notification_text">Storm near Palermo may affect the vessel</div>
+                            </div>
+                            <div class="sidebar__vessel_notification_status">
+                                <img src="img/info-circle.svg" alt="">
+                            </div>
+                        </div>
+                  </div>  
+            </div>
+                    </div> 
+            <!-- sidebar -->
+            
+        </div>
+        <div class="content_panel">
+                <div class="vessel_info_tab__col">
+                    <ul class="tabs">
+                      <li class="open" data-tab-id="tabLive">Main info</li>
+                      <li data-tab-id="tabdaily">Digital Twin</li> 
+                    </ul> 
+                    <div class="updated_info">
+                        <div class="updated_info_text">Last update 10 sec ago</div>
+                        <div class="updated_info_button"><img src="img/updated-ico.svg" alt="">Update</div>
+                    </div>
+                </div>
+            <div id="tabLive" class="tabs__content open">
+                <div class="top_content_col">
+                    <div class="top_content_col_l">
+                        <div class="vessel_progress_bar">
+                            <div class="content_col_title">Itinerary</div>
+                            <div class="country_name">
+                                <div class="country_start"><img src="img/Catanzaro.png" alt="">Catanzaro</div>
+                                <div class="country_end"><img src="img/Catanzaro.png" alt="">Taranto</div>
+                            </div>
+                            <input type="range" value="25" min="0" max="100" class="vessel_progress_bar_input" />
+                            <div class="vessel_progress_box">
+                                <div class="vessel_progress_sector">
+                                    <div class="vessel_county_progress"><img src="img/flag-ico.png" alt="">Italy</div>
+                                </div>
+                                <div class="vessel_progress_sector">
+                                    <div class="vessel_county_progress">Neutral</div>
+                                </div>
+                                <div class="vessel_progress_sector">
+                                    <div class="vessel_county_progress"><img src="img/flag-ico.png" alt="">Italy</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="content_curent_location">
+                            <div class="content_curent_location_label">Current location</div>
+                            <div class="content_curent_location_text">Western Mediterranean, IT</div>
+                        </div> 
+                    </div>
+                    <div class="top_content_col_r">
+                        <div id="mapid"></div>
+                    </div>
+                  </div>  
+
+                    <div class="content_vessel_notification_title">Notifications</div>
+                    <div class="content_vessel_notification_box">
+                        <div class="sidebar__vessel_notification notification_box">
+                            <div class="sidebar__vessel_notification_text">
+                                <div class="sidebar__vessel_notification_date">20.07.21 at 09:00</div>
+                                <div class="sidebar__vessel_notification_text">Storm near Palermo may affect the vessel</div>
+                            </div>
+                            <div class="sidebar__vessel_notification_status">
+                                <img src="img/thunder-circle.svg" alt="">
+                            </div>
+                        </div>
+                        <div class="sidebar__vessel_notification notification_box">
+                            <div class="sidebar__vessel_notification_text">
+                                <div class="sidebar__vessel_notification_date">20.07.21 at 09:00</div>
+                                <div class="sidebar__vessel_notification_text">Storm near Palermo may affect the vessel</div>
+                            </div>
+                            <div class="sidebar__vessel_notification_status">
+                                <img src="img/warning-circle.svg" alt="">
+                            </div>
+                        </div>
+                        <div class="sidebar__vessel_notification notification_box">
+                            <div class="sidebar__vessel_notification_text">
+                                <div class="sidebar__vessel_notification_date">20.07.21 at 09:00</div>
+                                <div class="sidebar__vessel_notification_text">Storm near Palermo may affect the vessel</div>
+                            </div>
+                            <div class="sidebar__vessel_notification_status">
+                                <img src="img/info-circle.svg" alt="">
+                            </div>
+                        </div>
+                        <div class="sidebar__vessel_notification notification_box">
+                            <div class="sidebar__vessel_notification_text">
+                                <div class="sidebar__vessel_notification_date">20.07.21 at 09:00</div>
+                                <div class="sidebar__vessel_notification_text">Storm near Palermo may affect the vessel</div>
+                            </div>
+                            <div class="sidebar__vessel_notification_status">
+                                <img src="img/info-circle.svg" alt="">
+                            </div>
+                        </div>
+                        <div class="sidebar__vessel_notification notification_box">
+                            <div class="sidebar__vessel_notification_text">
+                                <div class="sidebar__vessel_notification_date">20.07.21 at 09:00</div>
+                                <div class="sidebar__vessel_notification_text">Storm near Palermo may affect the vessel</div>
+                            </div>
+                            <div class="sidebar__vessel_notification_status">
+                                <img src="img/warning-circle.svg" alt="">
+                            </div>
+                        </div> 
+                </div>
+                <div class="content_vessel_weathwer_title">Weather</div>
+                <div class="content_vessel_weathwer_box"> 
+                    <div class="weathwer_box_col">
+                        <img src="img/weathwer_box_wind.svg" alt="">
+                        <div class="weathwer_box_info">
+                            <div class="weathwer_box_info_label">Wind</div>
+                            <div class="weathwer_box_info_text">4.0 m/s</div>
+                        </div>
+                    </div>
+                    <div class="weathwer_box_col normal ">
+                        <img src="img/weathwer_box_waves.svg" alt="">
+                        <div class="weathwer_box_info">
+                            <div class="weathwer_box_info_label">Waves</div>
+                            <div class="weathwer_box_info_text">6.0 m</div>
+                        </div>
+                    </div>
+                    <div class="weathwer_box_col">
+                        <img src="img/weathwer_box_swell.svg" alt="">
+                        <div class="weathwer_box_info">
+                            <div class="weathwer_box_info_label">Swell</div>
+                            <div class="weathwer_box_info_text">5.0 m</div>
+                        </div>
+                    </div>
+                    <div class="weathwer_box_col">
+                        <img src="img/weathwer_box_speed.svg" alt="">
+                        <div class="weathwer_box_info">
+                            <div class="weathwer_box_info_label">Speed</div>
+                            <div class="weathwer_box_info_text">25.0 kn</div>
+                        </div>
+                    </div>
+                    <div class="weathwer_box_col">
+                        <img src="img/weathwer_box_current.png" alt="">
+                        <div class="weathwer_box_info">
+                            <div class="weathwer_box_info_label">Current</div>
+                            <div class="weathwer_box_info_text">6.0 m</div>
+                        </div>
+                    </div>
+                    <div class="weathwer_box_col">
+                        <img src="img/weathwer_box_fouling.svg" alt="">
+                        <div class="weathwer_box_info">
+                            <div class="weathwer_box_info_label">Fouling</div>
+                            <div class="weathwer_box_info_text">5.0 m</div>
+                        </div>
+                    </div> 
+                </div>
+                <div class="charts_content_row">
+                  <div class="charts_col charts_content_col_l">
+                            <div class="content_col_title">ME performance</div>
+                    <!-- HTML -->
+                    <div id="chartdiv" class="chart_container"></div>
+                  </div>
+                  <div class="charts_col charts_content_col_r">
+                            <div class="content_col_title">AE Performance</div>
+                    <!-- HTML -->
+                    <div id="chartdiv2" class="chart_container"></div>
+                    </div>
+                </div>
+                    <div class="charts_content_row"> 
+                        <div class="charts_col charts_content_col_full">
+                            <div class="content_col_title">Daily fuel consumption</div>
+                            <div id="chartdiv10" class="chart_container"></div>
+                        </div>
+                    </div>
+
+            </div>
+            <div id="tabdaily" class="tabs__content ">
+                <div class="water_tank_row">
+                    <div class="water_tank_row_head">
+                        <div class="content_col_title">Ballast water tanks</div>
+                        <div class="water_tank_row_head_info"> 
+                            <div class="water_tank_row_head_info_box">
+                                <div class="water_tank_info_label">List</div>
+                                <div class="water_tank_info_text">0.01 deg</div>
+                            </div>
+                            <div class="water_tank_row_head_info_box">
+                                <div class="water_tank_info_label">Trim</div>
+                                <div class="water_tank_info_text">1.87 m</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ballast_water_tanks"><iframe src="balast.html" width="1100" height="460" frameBorder="0" scrolling="no"></iframe>  
+                    </div> 
+                </div> 
+
+                <div class="charts_tank_row">
+                    <div class="charts_content_row"> 
+                        <div class="charts_col charts_content_col_full">
+                            <div class="content_col_title">Fuel tanks condition</div>
+                            <div id="chartdiv1" class="chart_container"></div>
+                        </div>
+                    </div>
+                    <div class="charts_content_row">
+                      <div class="charts_col charts_content_col_l">
+                        <!-- HTML -->
+                            <div class="content_col_title">ME1</div>
+                        <div id="chartdiv3" class="chart_container"></div>
+                      </div>
+                      <div class="charts_col charts_content_col_r">
+                        <!-- HTML -->
+                            <div class="content_col_title">ME2</div>
+                        <div id="chartdiv4" class="chart_container"></div>
+                        </div>
+                    </div>
+                    <div class="charts_content_row">
+                      <div class="charts_col charts_content_col_l">
+                            <div class="content_col_title">ME1</div>
+                        <!-- HTML -->
+                        <div id="chartdiv5" class="chart_container"></div>
+                      </div>
+                      <div class="charts_col charts_content_col_r">
+                            <div class="content_col_title">ME1</div>
+                        <!-- HTML -->
+                        <div id="chartdiv6" class="chart_container"></div>
+                        </div>
+                    </div>
+                    <div class="charts_content_row">
+                      <div class="charts_col charts_content_col_l">
+                            <div class="content_col_title">AE Performance</div>
+                        <!-- HTML -->
+                        <div id="chartdiv7" class="chart_container"></div>
+                      </div>
+                      <div class="charts_col charts_content_col_r"> 
+                        <!-- HTML -->
+                        <div id="chartdivBoiler" class="chart_container"></div> 
+                        </div>
+                    </div>
+                    <div class="charts_content_row"> 
+                        <div class="charts_col charts_content_col_full">
+                            <div class="content_col_title">Speed log</div>
+                            <div id="chartdiv9" class="chart_container"></div>
+                        </div>
+                    </div>
+                    <div class="charts_content_row">
+                      <div class="charts_col charts_content_col_l">
+                            <div class="content_col_title">Wind</div>
+                        <!-- HTML -->
+                        <div id="chartdiv8" class="chart_container"></div>
+                      </div>
+                      <div class="charts_col charts_content_col_r">
+                            <div class="content_col_title">Echo Sounder</div>
+                        <!-- HTML -->
+                        <div id="chartEcho" class="chart_container"></div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- map -->
+        <!-- map -->
+
+    </div>
+</div> 
+
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script> 
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" ></script>  
+<script src="js/L.Control.Sidebar.js"></script>  
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+<script src="js/leaflet-curve.js"></script>
+<script src="js/data.js"></script>
+<script src="js/common_metric.js"></script>   
+</body> 
+</html> 
