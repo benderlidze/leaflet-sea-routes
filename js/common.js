@@ -430,16 +430,12 @@ geojsonGroup.addTo(map);
 addRoute(r)
 
 
-const pline = getCoordinatesFromPoints(r.waypoints)
-const polyline = antimeridian(pline).map(i => i.reverse())
-console.log('pline', pline, polyline);
-var line = L.polyline(polyline, { snakingSpeed: 400 });
-line.addTo(map).snakeIn()
+
 
 
 function addRoute(data) {
+  console.log('data', data);
   const path = data.waypoints
-
   const tCoords = getCoordinatesFromPoints(path)
   const coords = antimeridian(tCoords)
 
@@ -450,20 +446,107 @@ function addRoute(data) {
 
   var myStyle = {
     "color": "white",
-    "weight": 5,
-    "opacity": 0.65
+    "weight": 15,
+    "opacity": 0.25
   };
-
   //clear everything
   geojsonGroup.eachLayer(i => i.remove())
 
-  const geojson = L.geoJSON(line, {
-    style: myStyle
+  const popupText = `
+    <div>
+      <div class="item">From: ${data.points[0].properties.name}</div>
+      <div class="item">To: ${data.points[1].properties.name}</div>
+      <div class="item">Total distance: ${data.totalDistance}</div>
+    </div>
+  `
+
+  //1. snake line over main path 
+  const pline = getCoordinatesFromPoints(data.waypoints)
+  const polyline = antimeridian(pline).map(i => i.reverse())
+  var snakeLine = L.polyline(polyline, {
+    color: 'red',
+    snakingSpeed: 400,
   })
+  snakeLine.addTo(map).snakeIn()
 
+  //2. maine line path
+  const geojson = L.geoJSON(line, {
+    style: myStyle,
+    // onEachFeature: function (feature, layer) {
+    //   if (layer instanceof L.Polyline) {
+    //     console.log('layer', layer, feature);
+    //     layer.setStyle({
+    //       color: "blue",
+    //     });
+    //   }
+    // },
+  })
+  geojson.eachLayer(function (layer) {
+    var popup = L.popup();
+    popup.setContent(popupText);
+    layer.bindPopup(popup);
+    layer.on('mouseover', function (e) {
+      var popup = e.target.getPopup();
+      popup.setLatLng(e.latlng).openOn(map);
+      console.log('e', e);
+
+      hightlightSegment(findClosestPoint(coords, e))
+    });
+    layer.on('mouseout', function (e) {
+      e.target.closePopup();
+    });
+    // update popup location
+    layer.on('mousemove', function (e) {
+      popup.setLatLng(e.latlng).openOn(map);
+      hightlightSegment(findClosestPoint(coords, e))
+    });
+    layer.on('click', function (e) {
+      hightlightSegment(findClosestPoint(coords, e))
+    });
+  });
   geojsonGroup.addLayer(geojson);
-  //geojsonGroup.removeLayer(layerPostalcodes);
+}
 
+let hSegment;
+
+function hightlightSegment(segment) {
+  if(hSegment)hSegment.remove();
+
+  console.log('segment', segment);
+  const line = turf.lineString(segment.coord)
+  var myStyle = {
+    "color": "blue",
+    "weight": 12,
+    "opacity": 1
+  };
+  hSegment = L.geoJSON(line, {
+    style: myStyle,
+  }).addTo(map)
+
+  hSegment.bringToBack()
+
+}
+
+function findClosestPoint(coords, point) {
+  console.log('path', path);
+  const segments = []
+  const { lat, lng } = point.latlng
+  const pt = turf.point([lng, lat]);
+
+  for (let i = 0; i < coords.length - 1; i++) {
+    var line = turf.lineString([coords[i], coords[i + 1]]);
+    var distance = turf.pointToLineDistance(pt, line, { units: 'kilometers' });
+    segments.push({
+      index: i,
+      distance,
+      coord: [coords[i], coords[i + 1]]
+    });
+  }
+  console.log('segments', segments);
+  segments.sort((a, b) =>
+    a.distance < b.distance ? -1 : 1
+  );
+  return segments[0];
 }
 
 function getCoordinatesFromPoints(path) {
