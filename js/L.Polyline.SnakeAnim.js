@@ -74,7 +74,7 @@ L.Polyline.include({
 	},
 
 	_snakeForward: function(forward) {
-
+		forward = (forward == 0 ? 0.00000000001 : forward);
 		// If polyline has been removed from the map stop _snakeForward
 		if (!this._map) return;
 		// Calculate distance from current vertex to next vertex
