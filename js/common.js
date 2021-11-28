@@ -465,7 +465,7 @@ function addRoute(data) {
   const polyline = antimeridian(pline).map(i => i.reverse())
   var snakeLine = L.polyline(polyline, {
     color: 'red',
-    snakingSpeed: 400,
+    snakingSpeed: 200,
   })
   snakeLine.addTo(map).snakeIn()
 
@@ -482,15 +482,23 @@ function addRoute(data) {
     // },
   })
   geojson.eachLayer(function (layer) {
-    var popup = L.popup();
+    var popup = L.popup({
+      offset: [0, -5]
+    });
     popup.setContent(popupText);
+
     layer.bindPopup(popup);
     layer.on('mouseover', function (e) {
-      var popup = e.target.getPopup();
-      popup.setLatLng(e.latlng).openOn(map);
-      console.log('e', e);
+      const segment = hightlightSegment(findClosestPoint(coords, e))
+      console.log('segment', segment);
 
-      hightlightSegment(findClosestPoint(coords, e))
+      var popup = e.target.getPopup();
+      popup.setContent(popupText + `
+        <div>Distance: ${segment.pathDistance}</div>
+        <div>Bearing: ${segment.bearing}</div>
+      `);
+      popup.setLatLng(e.latlng).openOn(map);
+
     });
     layer.on('mouseout', function (e) {
       e.target.closePopup();
@@ -500,9 +508,9 @@ function addRoute(data) {
       popup.setLatLng(e.latlng).openOn(map);
       hightlightSegment(findClosestPoint(coords, e))
     });
-    layer.on('click', function (e) {
-      hightlightSegment(findClosestPoint(coords, e))
-    });
+    // layer.on('click', function (e) {
+    //   hightlightSegment(findClosestPoint(coords, e))
+    // });
   });
   geojsonGroup.addLayer(geojson);
 }
@@ -510,9 +518,8 @@ function addRoute(data) {
 let hSegment;
 
 function hightlightSegment(segment) {
-  if(hSegment)hSegment.remove();
-
-  console.log('segment', segment);
+  if (hSegment) hSegment.remove();
+  // console.log('segment', segment);
   const line = turf.lineString(segment.coord)
   var myStyle = {
     "color": "blue",
@@ -524,25 +531,33 @@ function hightlightSegment(segment) {
   }).addTo(map)
 
   hSegment.bringToBack()
-
+  return segment
 }
 
 function findClosestPoint(coords, point) {
-  console.log('path', path);
+  // console.log('path', path);
   const segments = []
   const { lat, lng } = point.latlng
   const pt = turf.point([lng, lat]);
 
   for (let i = 0; i < coords.length - 1; i++) {
-    var line = turf.lineString([coords[i], coords[i + 1]]);
-    var distance = turf.pointToLineDistance(pt, line, { units: 'kilometers' });
+    const line = turf.lineString([coords[i], coords[i + 1]]);
+    const distance = turf.pointToLineDistance(pt, line, { units: 'kilometers' });
+
+    const from = turf.point(coords[i]);
+    const to = turf.point(coords[i + 1]);
+    const bearing = turf.bearing(from, to);
+    const pathDistance = turf.distance(from, to, { units: 'kilometers' }) / 1.852;
+
     segments.push({
       index: i,
       distance,
-      coord: [coords[i], coords[i + 1]]
+      coord: [coords[i], coords[i + 1]],
+      pathDistance,
+      bearing
     });
   }
-  console.log('segments', segments);
+  // console.log('segments', segments);
   segments.sort((a, b) =>
     a.distance < b.distance ? -1 : 1
   );
