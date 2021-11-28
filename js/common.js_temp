@@ -438,8 +438,10 @@ function addRoute(data) {
   const path = data.waypoints
   const tCoords = getCoordinatesFromPoints(path)
   const coords = antimeridian(tCoords)
+  console.log('coords', coords);
 
-  const line = turf.lineString(coords)
+  const coordsOnly = coords.map(i => i.coords)
+  const line = turf.lineString(coordsOnly)
   var [lat, lng, lat1, lng1] = turf.bbox(line);
   const bounds = new L.LatLngBounds([lng1, lat1], [lng, lat]);
   map.fitBounds(bounds)
@@ -459,33 +461,18 @@ function addRoute(data) {
       <div class="item">Total distance: ${data.totalDistance}</div>
     </div>
   `
-
   //1. snake line over main path 
-  const pline = getCoordinatesFromPoints(data.waypoints)
-  const polyline = antimeridian(pline).map(i => i.reverse())
-  var snakeLine = L.polyline(polyline, {
+  console.log('coordsOnly', coordsOnly);
+  const revCoordsOnly = coordsOnly.map(i => i.reverse())
+  const snakeLine = L.polyline(revCoordsOnly, {
     color: 'red',
     snakingSpeed: 200,
   })
   snakeLine.addTo(map).snakeIn()
 
-  snakeLine.on("snakeend", ev => {
-    //console.log(ev.type);
-    //snakestart snake 
-    snakeLine.snakeIn()
-  });
-
   //2. maine line path
   const geojson = L.geoJSON(line, {
     style: myStyle,
-    // onEachFeature: function (feature, layer) {
-    //   if (layer instanceof L.Polyline) {
-    //     console.log('layer', layer, feature);
-    //     layer.setStyle({
-    //       color: "blue",
-    //     });
-    //   }
-    // },
   })
   geojson.eachLayer(function (layer) {
     var popup = L.popup({
@@ -498,16 +485,8 @@ function addRoute(data) {
       const segment = hightlightSegment(findClosestPoint(coords, e))
       console.log('segment', segment);
 
-      const add = path[segment.index + 1]?.properties
-      console.log('add', add);
-
       var popup = e.target.getPopup();
       popup.setContent(popupText + `
-        <div><b>From API</b></div>
-        <div>Distance: ${add.distance}</div>
-        <div>Bearing: ${add.course}</div>
-
-        <div>Calculated</div>
         <div>Distance: ${segment.pathDistance}</div>
         <div>Bearing: ${segment.bearing}</div>
       `);
@@ -579,7 +558,12 @@ function findClosestPoint(coords, point) {
 }
 
 function getCoordinatesFromPoints(path) {
-  const coords = path.map(i => i.geometry.coordinates)
+  const coords = path.map(i => {
+    return {
+      coords: i.geometry.coordinates,
+      props: i.properties
+    }
+  })
   return coords
 }
 
@@ -587,7 +571,7 @@ function antimeridian(data) {
   const elem = JSON.parse(JSON.stringify(data))
   for (var i = 0; i < elem.length; i++) {
     if (elem[i - 1]) {
-      elem[i][0] += elem[i][0] - elem[i - 1][0] > 180 ? -360 : elem[i - 1][0] - elem[i][0] > 180 ? 360 : 0;
+      elem[i].coords[0] += elem[i].coords[0] - elem[i - 1].coords[0] > 180 ? -360 : elem[i - 1].coords[0] - elem[i].coords[0] > 180 ? 360 : 0;
     }
   }
   return elem
