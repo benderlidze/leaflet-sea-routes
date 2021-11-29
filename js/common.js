@@ -432,9 +432,9 @@ const l = {"points":[{"properties":{"name":"Mariupol / ex Zhdanov","port":"UAMPW
 let snakeLine;
 const geojsonGroup = new L.LayerGroup();
 geojsonGroup.addTo(map);
-addRoute(r)
-addRoute(p)
-addRoute(l)
+// addRoute(r)
+// addRoute(p)
+// addRoute(l)
 
 
 
