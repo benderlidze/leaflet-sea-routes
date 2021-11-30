@@ -8,15 +8,23 @@ const wayFromTo = {
 var map = L.map('mapid', {
 
 }).setView([50.80925310310907, -0.1361937699561519], 3);
-L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoidmVyc3N0YWNoaSIsImEiOiJja3Q1bjI1OG0wYTB1MndwaG0wZTI0eG0yIn0.KW23CHoSsSdBk52ntlTaRA', {
-  attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-  id: 'mapbox/dark-v10',
-  // tileSize: 256,
-  zoomControl: false,
-  accessToken: 'pk.eyJ1IjoidmVyc3N0YWNoaSIsImEiOiJja3Q1bjI1OG0wYTB1MndwaG0wZTI0eG0yIn0.KW23CHoSsSdBk52ntlTaRA',
-  style: 'mapbox://styles/mapbox/dark-v10',
-}).addTo(map);
+// const tiles = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoidmVyc3N0YWNoaSIsImEiOiJja3Q1bjI1OG0wYTB1MndwaG0wZTI0eG0yIn0.KW23CHoSsSdBk52ntlTaRA', {
+//   attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+//   zoomControl: false,
+//   accessToken: 'pk.eyJ1IjoidmVyc3N0YWNoaSIsImEiOiJja3Q1bjI1OG0wYTB1MndwaG0wZTI0eG0yIn0.KW23CHoSsSdBk52ntlTaRA',
+//   style: 'mapbox://styles/mapbox/dark-v10',
+// })
+// tiles.addTo(map);
 
+
+
+var layer = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoidmVyc3N0YWNoaSIsImEiOiJja3Q1bjI1OG0wYTB1MndwaG0wZTI0eG0yIn0.KW23CHoSsSdBk52ntlTaRA', {
+  maxZoom: 18,
+  attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+  useCache: true,
+  crossOrigin: true
+});
+layer.addTo(map);
 
 
 map.options.maxZoom = 20;
@@ -307,7 +315,6 @@ function wayFromPortFunc(e) {
         //UNIQUE by locode
         const autComplResultArray = [...new Map(json.map(item => [item['locode'], item])).values()];
 
-
         console.log('autComplResultArray', autComplResultArray);
         way_from_result.innerHTML = '';
 
@@ -330,7 +337,7 @@ function wayFromPortFunc(e) {
             wayFromTo.from = autComplResultArray[i].locode
 
             const { lat, lon } = autComplResultArray[i];
-            map.flyTo([lat, lon], 10)
+            map.flyTo([lat, lon], 7)
           }
         }
       })
@@ -377,7 +384,7 @@ function wayToPortFunc(e) {
             wayFromTo.to = autComplResultArray[i].locode
 
             const { lat, lon } = autComplResultArray[i];
-            map.flyTo([lat, lon], 10)
+            map.flyTo([lat, lon], 7)
           }
         }
       })
