@@ -1,4 +1,7 @@
 
+
+
+
 const wayFromTo = {
   from: "",
   to: ""
@@ -35,7 +38,14 @@ function clickZoom(e) {
   map.setView(e.target.getLatLng(), 5);
 }
 
-
+fetch("conditional-areas.json")
+  .then(i => i.json())
+  .then(i => {
+    console.log('i', i);
+    const collection = turf.featureCollection(i)
+    console.log('collection', collection);
+    var freeBusLayer = L.geoJSON(collection).addTo(map);
+  })
 
 var markers = [
   [23.135044427508504, -82.42811672821004, "MSC SEASIDE", "stay", "notification_warning", "2"],
