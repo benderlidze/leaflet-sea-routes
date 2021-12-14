@@ -344,7 +344,7 @@ function wayFromPortFunc(e) {
             var wayFromPort = document.getElementById('way_from');
             wayFromPort.value = this.innerHTML;
             way_from_result.innerHTML = '';
-            wayFromTo.from = autComplResultArray[i].locode
+            wayFromTo.from = autComplResultArray[i].id
 
             const { lat, lon } = autComplResultArray[i];
             map.flyTo([lat, lon], 7)
@@ -391,7 +391,7 @@ function wayToPortFunc(e) {
             var wayToPort = document.getElementById('way_to');
             wayToPort.value = this.innerHTML;
             way_to_result.innerHTML = '';
-            wayFromTo.to = autComplResultArray[i].locode
+            wayFromTo.to = autComplResultArray[i].id
 
             const { lat, lon } = autComplResultArray[i];
             map.flyTo([lat, lon], 7)
@@ -424,9 +424,16 @@ function waySearchFunc() {
   var myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
+
+  //shipowner=1&vessel=1&port_from=LVRIX-2471&port_to=NLRTM-1276&etd=2021-12-13T14%3A11%3A18.973Z&eta=2021-12-30T14%3A11%3A18.973Z
   var urlencoded = new URLSearchParams();
+  urlencoded.append("shipowner", 1);
+  urlencoded.append("vessel", 1);
   urlencoded.append("port_from", wayFromTo.from);
   urlencoded.append("port_to", wayFromTo.to);
+  urlencoded.append("etd", new Date().toISOString());
+  urlencoded.append("eta", new Date().toISOString());
+
 
   var requestOptions = {
     method: 'POST',
@@ -435,31 +442,84 @@ function waySearchFunc() {
     redirect: 'follow'
   };
   spinner.removeAttribute('hidden');
-  fetch("https://demo2-2021-api.marine-digital.com/route/simple", requestOptions)
+  fetch("https://demo2-2021-api.marine-digital.com/voyage/", requestOptions)
     .then(response => response.json())
     .then(resultArray => {
-      console.log('resultArray', resultArray);
-      addRoute(resultArray)
-      spinner.setAttribute('hidden', '');
+
+      if (resultArray && +resultArray.id > 0) {
+        //fetch("https://demo2-2021-api.marine-digital.com/route/voyage/" + resultArray.id)
+        fetch("https://demo2-2021-api.marine-digital.com/route/voyage/1")
+          .then(resp => resp.json())
+          .then(json => {
+            spinner.setAttribute('hidden', '');
+            buildRoutes(json)
+          })
+      }
+
     })
     .catch(error => console.log('error', error));
 }
 
-let snakeLine;
-const geojsonGroup = new L.LayerGroup();
-geojsonGroup.addTo(map);
-// addRoute(r)
-// addRoute(p)
-// addRoute(l)
+
+
+//TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+fetch("test_data/test1.json")
+  .then(resp => resp.json())
+  .then(json => {
+    spinner.setAttribute('hidden', '');
+    buildRoutes(json)
+  })
+
+
+function buildRoutes(data) {
+  console.log('Routes data', data);
+  if (data.routes.length === 0) return;
+  data.routes.forEach((routeData, index) => {
+    addRoute(routeData, data.voyage, index)
+  })
+}
 
 
 
-function addRoute(data) {
+function addRoute(data, voyage, index) {
+  console.log('data', data);
+  console.log('data', voyage);
 
+  let snakeLine;
+  const geojsonGroup = new L.LayerGroup();
+  geojsonGroup.addTo(map);
 
   if (snakeLine) snakeLine.remove();
 
-  const path = data.waypoints
+  const path = (data.route_type === "basic") ? data.json.paths[0].points : data.json.routes[0].points
+
+  if (path.length === 0) return;
+  console.log('-------------------');
+  console.log('path', path);
+
+  let snakeColor = "red"
+  let pathColor = "gray"
+
+  switch (data.route_type) {
+    case "basic":
+      snakeColor = "red"
+      pathColor = "gray"
+      break;
+    case "cost":
+      snakeColor = "green"
+      pathColor = "green"
+      break;
+    case "fuel":
+      snakeColor = "#f57100"
+      pathColor = "#f57100"
+      break;
+    case "time":
+      snakeColor = "orange"
+      pathColor = "orange"
+      break;
+  }
+
+
   const tCoords = getCoordinatesFromPoints(path)
   const coords = antimeridian(tCoords)
 
@@ -469,7 +529,7 @@ function addRoute(data) {
   map.fitBounds(bounds)
 
   var myStyle = {
-    "color": "white",
+    "color": pathColor,
     "weight": 15,
     "opacity": 0.25
   };
@@ -478,26 +538,23 @@ function addRoute(data) {
 
   const popupText = `
     <div>
-      <div class="item">From: ${data.points[0].properties.name}</div>
-      <div class="item">To: ${data.points[1].properties.name}</div>
-      <div class="item">Total distance: ${data.totalDistance}</div>
+      <div class="item">From: ${voyage.port_from}</div>
+      <div class="item">To: ${voyage.port_to}</div>
+      <div class="item">Total distance: ${data.distance}</div>
     </div>
   `
 
   //1. snake line over main path 
-  const pline = getCoordinatesFromPoints(data.waypoints)
+  const pline = getCoordinatesFromPoints(path)
   const polyline = antimeridian(pline).map(i => i.reverse())
   snakeLine = L.polyline(polyline, {
-    color: 'red',
+    color: snakeColor,
     snakingSpeed: 200,
   })
   snakeLine.addTo(map).snakeIn()
   snakeLine.on("snakeend", ev => {
-    //console.log(ev.type);
-    //snakestart snake
     snakeLine.snakeIn()
   });
-  console.log('snakeLine', snakeLine);
 
   //2. maine line path
   const geojson = L.geoJSON(line, {
@@ -522,7 +579,6 @@ function addRoute(data) {
         <div><b>From API</b></div>
         <div>Distance: ${add.distance}</div>
         <div>Bearing: ${add.course}</div>
-
         <div>Calculated</div>
         <div>Distance: ${segment.pathDistance}</div>
         <div>Bearing: ${segment.bearing}</div>
@@ -542,6 +598,8 @@ function addRoute(data) {
     //   hightlightSegment(findClosestPoint(coords, e))
     // });
   });
+
+
   geojsonGroup.addLayer(geojson);
 }
 
@@ -595,6 +653,7 @@ function findClosestPoint(coords, point) {
 }
 
 function getCoordinatesFromPoints(path) {
+  console.log('path!!!!', path);
   const coords = path.map(i => i.geometry.coordinates)
   return coords
 }
@@ -851,135 +910,6 @@ if (tabs) {
 }
 //end  custom Tabs
 
-// custom sortTable 
-function sortTable() {
-  var table, rows, switching, i, x, y, shouldSwitch;
-  table = document.querySelector(".custom_table");
-  switching = true;
-  /*Make a loop that will continue until
-  no switching has been done:*/
-  while (switching) {
-    //start by saying: no switching is done:
-    switching = false;
-    rows = table.rows;
-    /*Loop through all table rows (except the
-    first, which contains table headers):*/
-    for (i = 1; i < (rows.length - 1); i++) {
-      //start by saying there should be no switching:
-      shouldSwitch = false;
-      /*Get the two elements you want to compare,
-      one from current row and one from the next:*/
-      x = rows[i].getElementsByTagName("TD")[0];
-      y = rows[i + 1].getElementsByTagName("TD")[0];
-      //check if the two rows should switch place:
-      if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-        //if so, mark as a switch and break the loop:
-        shouldSwitch = true;
-        break;
-      }
-    }
-    if (shouldSwitch) {
-      /*If a switch has been marked, make the switch
-      and mark that a switch has been done:*/
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-    }
-  }
-}
-// end custom sortTable 
-
-
-// custom-select 
-// var x, i, j, l, ll, selElmnt, a, b, c;
-// /* Look for any elements with the class "custom-select": */
-// x = document.getElementsByClassName("custom-select");
-// l = x.length;
-// for (i = 0; i < l; i++) {
-//   selElmnt = x[i].getElementsByTagName("select")[0];
-//   ll = selElmnt.length;
-//   /* For each element, create a new DIV that will act as the selected item: */
-//   a = document.createElement("DIV");
-//   a.setAttribute("class", "select-selected");
-//   a.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
-//   x[i].appendChild(a);
-//   /* For each element, create a new DIV that will contain the option list: */
-//   b = document.createElement("DIV");
-//   b.setAttribute("class", "select-items select-hide");
-//   for (j = 1; j < ll; j++) {
-//     /* For each option in the original select element,
-//     create a new DIV that will act as an option item: */
-//     c = document.createElement("DIV");
-//     c.innerHTML = selElmnt.options[j].innerHTML;
-//     c.addEventListener("click", function(e) {
-//         /* When an item is clicked, update the original select box,
-//         and the selected item: */
-//         var y, i, k, s, h, sl, yl;
-//         s = this.parentNode.parentNode.getElementsByTagName("select")[0];
-//         sl = s.length;
-//         h = this.parentNode.previousSibling;
-//         for (i = 0; i < sl; i++) {
-//           if (s.options[i].innerHTML == this.innerHTML) {
-//             s.selectedIndex = i;
-//             h.innerHTML = this.innerHTML;
-//             y = this.parentNode.getElementsByClassName("same-as-selected");
-//             yl = y.length;
-//             for (k = 0; k < yl; k++) {
-//               y[k].removeAttribute("class");
-//             }
-//             this.setAttribute("class", "same-as-selected");
-//             break;
-//           }
-//         }
-//         h.click();
-//     });
-//     b.appendChild(c);
-//   }
-//   x[i].appendChild(b);
-//   a.addEventListener("click", function(e) {
-//     /* When the select box is clicked, close any other select boxes,
-//     and open/close the current select box: */
-//     e.stopPropagation();
-//     closeAllSelect(this);
-//     this.nextSibling.classList.toggle("select-hide");
-//     this.classList.toggle("select-arrow-active");
-//   });
-// }
-
-// function closeAllSelect(elmnt) {
-//   /* A function that will close all select boxes in the document,
-//   except the current select box: */
-//   var x, y, i, xl, yl, arrNo = [];
-//   x = document.getElementsByClassName("select-items");
-//   y = document.getElementsByClassName("select-selected");
-//   xl = x.length;
-//   yl = y.length;
-//   for (i = 0; i < yl; i++) {
-//     if (elmnt == y[i]) {
-//       arrNo.push(i)
-//     } else {
-//       y[i].classList.remove("select-arrow-active");
-//     }
-//   }
-//   for (i = 0; i < xl; i++) {
-//     if (arrNo.indexOf(i)) {
-//       x[i].classList.add("select-hide");
-//     }
-//   }
-// }
-
-/* If the user clicks anywhere outside the select box,
-then close all select boxes: */
-// document.addEventListener("click", closeAllSelect);
-// end custom Select
-
-// hover link right panel
-function lonkHoverActive(elem) {
-  var a = document.getElementsByClassName("left_panel__link")
-  for (i = 0; i < a.length; i++) {
-    a[i].classList.remove('active')
-  }
-  elem.classList.toggle('active');
-}
 
 
 

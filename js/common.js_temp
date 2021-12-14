@@ -1,4 +1,7 @@
 
+
+
+
 const wayFromTo = {
   from: "",
   to: ""
@@ -8,15 +11,23 @@ const wayFromTo = {
 var map = L.map('mapid', {
 
 }).setView([50.80925310310907, -0.1361937699561519], 3);
-L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoidmVyc3N0YWNoaSIsImEiOiJja3Q1bjI1OG0wYTB1MndwaG0wZTI0eG0yIn0.KW23CHoSsSdBk52ntlTaRA', {
-  attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-  id: 'mapbox/dark-v10',
-  // tileSize: 256,
-  zoomControl: false,
-  accessToken: 'pk.eyJ1IjoidmVyc3N0YWNoaSIsImEiOiJja3Q1bjI1OG0wYTB1MndwaG0wZTI0eG0yIn0.KW23CHoSsSdBk52ntlTaRA',
-  style: 'mapbox://styles/mapbox/dark-v10',
-}).addTo(map);
+// const tiles = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoidmVyc3N0YWNoaSIsImEiOiJja3Q1bjI1OG0wYTB1MndwaG0wZTI0eG0yIn0.KW23CHoSsSdBk52ntlTaRA', {
+//   attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+//   zoomControl: false,
+//   accessToken: 'pk.eyJ1IjoidmVyc3N0YWNoaSIsImEiOiJja3Q1bjI1OG0wYTB1MndwaG0wZTI0eG0yIn0.KW23CHoSsSdBk52ntlTaRA',
+//   style: 'mapbox://styles/mapbox/dark-v10',
+// })
+// tiles.addTo(map);
 
+
+
+var layer = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoidmVyc3N0YWNoaSIsImEiOiJja3Q1bjI1OG0wYTB1MndwaG0wZTI0eG0yIn0.KW23CHoSsSdBk52ntlTaRA', {
+  maxZoom: 18,
+  attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+  useCache: true,
+  crossOrigin: true
+});
+layer.addTo(map);
 
 
 map.options.maxZoom = 20;
@@ -27,7 +38,14 @@ function clickZoom(e) {
   map.setView(e.target.getLatLng(), 5);
 }
 
-
+fetch("conditional-areas.json")
+  .then(i => i.json())
+  .then(i => {
+    console.log('i', i);
+    const collection = turf.featureCollection(i)
+    console.log('collection', collection);
+    var freeBusLayer = L.geoJSON(collection).addTo(map);
+  })
 
 var markers = [
   [23.135044427508504, -82.42811672821004, "MSC SEASIDE", "stay", "notification_warning", "2"],
@@ -302,7 +320,10 @@ function wayFromPortFunc(e) {
     };
     fetch("https://demo2-2021-api.marine-digital.com/port/autocomplete?term=" + keyName, requestOptions)
       .then(response => response.json())
-      .then(autComplResultArray => {
+      .then(json => {
+        console.log('json', json);
+        //UNIQUE by locode
+        const autComplResultArray = [...new Map(json.map(item => [item['locode'], item])).values()];
 
         console.log('autComplResultArray', autComplResultArray);
         way_from_result.innerHTML = '';
@@ -326,7 +347,7 @@ function wayFromPortFunc(e) {
             wayFromTo.from = autComplResultArray[i].locode
 
             const { lat, lon } = autComplResultArray[i];
-            map.flyTo([lat, lon], 10)
+            map.flyTo([lat, lon], 7)
           }
         }
       })
@@ -350,10 +371,12 @@ function wayToPortFunc(e) {
       redirect: 'follow'
     };
     fetch("https://demo2-2021-api.marine-digital.com/port/autocomplete?term=" + keyName, requestOptions)
-      .then(response => response.text())
-      .then(result => {
-        console.log(result);
-        var autComplResultArray = JSON.parse(result);
+      .then(response => response.json())
+      .then(json => {
+        console.log('json', json);
+        //UNIQUE by locode
+        const autComplResultArray = [...new Map(json.map(item => [item['locode'], item])).values()];
+
         way_to_result.innerHTML = '';
         for (let i = 0; i < autComplResultArray.length; ++i) {
           console.log(autComplResultArray[i].locode);
@@ -371,7 +394,7 @@ function wayToPortFunc(e) {
             wayFromTo.to = autComplResultArray[i].locode
 
             const { lat, lon } = autComplResultArray[i];
-            map.flyTo([lat, lon], 10)
+            map.flyTo([lat, lon], 7)
           }
         }
       })
@@ -422,26 +445,25 @@ function waySearchFunc() {
     .catch(error => console.log('error', error));
 }
 
-const r = { "points": [{ "properties": { "name": "Klaipeda", "port": "LTKLJ" }, "type": "Feature", "geometry": { "coordinates": [21.142501831054688, 55.676605224609375], "type": "Point" } }, { "properties": { "name": "Tokyo", "port": "JPTYO" }, "type": "Feature", "geometry": { "coordinates": [139.7632293701172, 35.61231994628906], "type": "Point" } }], "waypoints": [{ "properties": { "distance": 27.993067591841548, "course": 106.27798415330568 }, "type": "Feature", "geometry": { "coordinates": [168.5269775390625, 70.28317260742188], "type": "Point" } }, { "properties": { "distance": 159.9255688091234, "course": 95.7263462117754 }, "type": "Feature", "geometry": { "coordinates": [176.32376098632812, 70.0177001953125], "type": "Point" } }, { "properties": { "distance": 88.15132760592543, "course": 119.38847489134284 }, "type": "Feature", "geometry": { "coordinates": [-179.99998474121094, 69.29801940917969], "type": "Point" } }, { "properties": { "distance": 13.569716030764825, "course": 121.35720286005834 }, "type": "Feature", "geometry": { "coordinates": [-179.45611572265625, 69.1805419921875], "type": "Point" } }, { "properties": { "distance": 158.61695196714152, "course": 113.53061175222726 }, "type": "Feature", "geometry": { "coordinates": [-172.80801391601562, 68.12699890136719], "type": "Point" } }, { "properties": { "distance": 133.3368702057387, "course": 142.85070217193652 }, "type": "Feature", "geometry": { "coordinates": [-169.34320068359375, 66.35887145996094], "type": "Point" } }, { "properties": { "distance": 30.189600936729097, "course": 180.0176244015306 }, "type": "Feature", "geometry": { "coordinates": [-169.3435821533203, 65.85661315917969], "type": "Point" } }, { "properties": { "distance": 117.7805928518284, "course": 213.29601839362806 }, "type": "Feature", "geometry": { "coordinates": [-171.89337158203125, 64.21878051757812], "type": "Point" } }, { "properties": { "distance": 26.05270093077972, "course": 231.71062462435955 }, "type": "Feature", "geometry": { "coordinates": [-172.67178344726562, 63.95021057128906], "type": "Point" } }, { "properties": { "distance": 45.01163473587416, "course": 248.29737957527954 }, "type": "Feature", "geometry": { "coordinates": [-174.24835205078125, 63.67329406738281], "type": "Point" } }, { "properties": { "distance": 1133.5577580965435, "course": 218.90197552338964 }, "type": "Feature", "geometry": { "coordinates": [158.54588317871094, 51.350494384765625], "type": "Point" } }, { "properties": { "distance": 77.33903348223379, "course": 219.70046395407383 }, "type": "Feature", "geometry": { "coordinates": [157.24386596679688, 50.36053466796875], "type": "Point" } }, { "properties": { "distance": 9.506232163475918, "course": 220.04165835670415 }, "type": "Feature", "geometry": { "coordinates": [157.08457946777344, 50.23945617675781], "type": "Point" } }, { "properties": { "distance": 53.96460018760822, "course": 223.1959193695116 }, "type": "Feature", "geometry": { "coordinates": [156.1302490234375, 49.58494567871094], "type": "Point" } }, { "properties": { "distance": 207.65867547384732, "course": 221.62613831054975 }, "type": "Feature", "geometry": { "coordinates": [152.67987060546875, 47.00251770019531], "type": "Point" } }, { "properties": { "distance": 863.3934304302505, "course": 213.85475699951724 }, "type": "Feature", "geometry": { "coordinates": [141.01962280273438, 35.57762145996094], "type": "Point" } }, { "properties": { "distance": 0.7583688621250676, "course": 323.0740946952663 }, "type": "Feature", "geometry": { "coordinates": [139.7672882080078, 35.61216735839844], "type": "Point" } }, { "properties": { "distance": 0.19855173597110315, "course": 272.6476087786225 }, "type": "Feature", "geometry": { "coordinates": [139.7632293701172, 35.61231994628906], "type": "Point" } }], "totalDistance": 7220.008581129174 }
-
-
+let snakeLine;
 const geojsonGroup = new L.LayerGroup();
 geojsonGroup.addTo(map);
-addRoute(r)
-
-
+// addRoute(r)
+// addRoute(p)
+// addRoute(l)
 
 
 
 function addRoute(data) {
-  console.log('data', data);
+
+
+  if (snakeLine) snakeLine.remove();
+
   const path = data.waypoints
   const tCoords = getCoordinatesFromPoints(path)
   const coords = antimeridian(tCoords)
-  console.log('coords', coords);
 
-  const coordsOnly = coords.map(i => i.coords)
-  const line = turf.lineString(coordsOnly)
+  const line = turf.lineString(coords)
   var [lat, lng, lat1, lng1] = turf.bbox(line);
   const bounds = new L.LatLngBounds([lng1, lat1], [lng, lat]);
   map.fitBounds(bounds)
@@ -461,14 +483,21 @@ function addRoute(data) {
       <div class="item">Total distance: ${data.totalDistance}</div>
     </div>
   `
+
   //1. snake line over main path 
-  console.log('coordsOnly', coordsOnly);
-  const revCoordsOnly = coordsOnly.map(i => i.reverse())
-  const snakeLine = L.polyline(revCoordsOnly, {
+  const pline = getCoordinatesFromPoints(data.waypoints)
+  const polyline = antimeridian(pline).map(i => i.reverse())
+  snakeLine = L.polyline(polyline, {
     color: 'red',
     snakingSpeed: 200,
   })
   snakeLine.addTo(map).snakeIn()
+  snakeLine.on("snakeend", ev => {
+    //console.log(ev.type);
+    //snakestart snake
+    snakeLine.snakeIn()
+  });
+  console.log('snakeLine', snakeLine);
 
   //2. maine line path
   const geojson = L.geoJSON(line, {
@@ -485,8 +514,16 @@ function addRoute(data) {
       const segment = hightlightSegment(findClosestPoint(coords, e))
       console.log('segment', segment);
 
+      const add = path[segment.index + 1]?.properties
+      console.log('add', add);
+
       var popup = e.target.getPopup();
       popup.setContent(popupText + `
+        <div><b>From API</b></div>
+        <div>Distance: ${add.distance}</div>
+        <div>Bearing: ${add.course}</div>
+
+        <div>Calculated</div>
         <div>Distance: ${segment.pathDistance}</div>
         <div>Bearing: ${segment.bearing}</div>
       `);
@@ -558,12 +595,7 @@ function findClosestPoint(coords, point) {
 }
 
 function getCoordinatesFromPoints(path) {
-  const coords = path.map(i => {
-    return {
-      coords: i.geometry.coordinates,
-      props: i.properties
-    }
-  })
+  const coords = path.map(i => i.geometry.coordinates)
   return coords
 }
 
@@ -571,7 +603,7 @@ function antimeridian(data) {
   const elem = JSON.parse(JSON.stringify(data))
   for (var i = 0; i < elem.length; i++) {
     if (elem[i - 1]) {
-      elem[i].coords[0] += elem[i].coords[0] - elem[i - 1].coords[0] > 180 ? -360 : elem[i - 1].coords[0] - elem[i].coords[0] > 180 ? 360 : 0;
+      elem[i][0] += elem[i][0] - elem[i - 1][0] > 180 ? -360 : elem[i - 1][0] - elem[i][0] > 180 ? 360 : 0;
     }
   }
   return elem
