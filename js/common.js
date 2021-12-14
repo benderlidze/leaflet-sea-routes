@@ -1,6 +1,7 @@
 
 
-
+const resultsDiv = document.getElementById("results");
+const allRoutes = [];
 
 const wayFromTo = {
   from: "",
@@ -447,8 +448,8 @@ function waySearchFunc() {
     .then(resultArray => {
 
       if (resultArray && +resultArray.id > 0) {
-        //fetch("https://demo2-2021-api.marine-digital.com/route/voyage/" + resultArray.id)
-        fetch("https://demo2-2021-api.marine-digital.com/route/voyage/1")
+        fetch("https://demo2-2021-api.marine-digital.com/route/voyage/" + resultArray.id)
+          //fetch("https://demo2-2021-api.marine-digital.com/route/voyage/1")
           .then(resp => resp.json())
           .then(json => {
             spinner.setAttribute('hidden', '');
@@ -472,8 +473,14 @@ fetch("test_data/test1.json")
 
 
 function buildRoutes(data) {
-  console.log('Routes data', data);
   if (data.routes.length === 0) return;
+
+  allRoutes.forEach(route => {
+    map.removeLayer(route.route)
+    map.removeLayer(route.snake)
+  })
+  allRoutes.length = 0;
+
   data.routes.forEach((routeData, index) => {
     addRoute(routeData, data.voyage, index)
   })
@@ -482,8 +489,6 @@ function buildRoutes(data) {
 
 
 function addRoute(data, voyage, index) {
-  console.log('data', data);
-  console.log('data', voyage);
 
   let snakeLine;
   const geojsonGroup = new L.LayerGroup();
@@ -494,8 +499,6 @@ function addRoute(data, voyage, index) {
   const path = (data.route_type === "basic") ? data.json.paths[0].points : data.json.routes[0].points
 
   if (path.length === 0) return;
-  console.log('-------------------');
-  console.log('path', path);
 
   let snakeColor = "red"
   let pathColor = "gray"
@@ -598,9 +601,20 @@ function addRoute(data, voyage, index) {
     //   hightlightSegment(findClosestPoint(coords, e))
     // });
   });
-
-
   geojsonGroup.addLayer(geojson);
+
+  allRoutes.push({
+    type: data.route_type,
+    route: geojsonGroup,
+    snake: snakeLine,
+    visible: true
+  });
+
+  resultsDiv.innerHTML += buildCard({
+    routeId: data.route_type,
+    type: data.route_type,
+    color: pathColor
+  })
 }
 
 let hSegment;
@@ -653,7 +667,6 @@ function findClosestPoint(coords, point) {
 }
 
 function getCoordinatesFromPoints(path) {
-  console.log('path!!!!', path);
   const coords = path.map(i => i.geometry.coordinates)
   return coords
 }
@@ -667,6 +680,69 @@ function antimeridian(data) {
   }
   return elem
 };
+
+document.addEventListener("input", function (e) {
+  console.log('e,this', e, this);
+  if (e.target.classList.contains("toggleRoute")) {
+    const routeType = e.target.getAttribute("data-route-id")
+    console.log('routeType', routeType);
+    toggleRoute(routeType)
+  }
+})
+
+function toggleRoute(type) {
+  const route = allRoutes.find(route => route.type === type);
+  if (route && route.visible) {
+    route.route.remove();
+    route.snake.remove();
+    route.visible = false;
+  } else {
+    route.route.addTo(map);
+    route.snake.addTo(map).snakeIn();
+    console.log('route.snake', route.snake);
+    route.visible = true;
+  }
+}
+
+function buildCard({ routeId, type, color }) {
+
+  return `<div class="voyage_way__card ">
+    <div class="voyage_way__card_header">
+      <div class="voyage_way__card_header_item">
+        <div class="voyage_way__card_header_label">ETA Forecast</div>
+        <div class="voyage_way__card_header_text">07 Sep 2021, 07:15</div>
+      </div>
+      <div class="voyage_way__card_header_status" style="color:${color}">
+        ${type} 
+        <input type="checkbox" checked name="" id="" data-route-id="${routeId}" class="toggleRoute">
+      </div>
+    </div>
+    <div class="voyage_way__card_body">
+      <div class="voyage_way__card_body_item">
+        <div class="voyage_way__card_body_label">Fuel saved        </div>
+        <div class="voyage_way__card_body_text">        </div>
+      </div>
+      <div class="voyage_way__card_body_item">
+        <div class="voyage_way__card_body_label">Total Savings
+        </div>
+        <div class="voyage_way__card_body_text">$13 000
+        </div>
+      </div>
+      <div class="voyage_way__card_body_item">
+        <div class="voyage_way__card_body_label">CO2 Emission control
+        </div>
+        <div class="voyage_way__card_body_text">120 MT
+        </div>
+      </div>
+    </div>
+    <div class="voyage_way__card_footer">
+      <div class="voyage_way__card_time">
+        <img src="img/time-ico.svg" alt="">~30 hours will be saved
+      </div>
+    </div>
+  </div>`;
+}
+
 
 function waySearchSnipetFunc() {
   document.querySelector(".voyage_panel").classList.remove('active');
