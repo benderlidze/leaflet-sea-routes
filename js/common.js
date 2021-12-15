@@ -449,7 +449,7 @@ function waySearchFunc() {
 
       if (resultArray && +resultArray.id > 0) {
         fetch("https://demo2-2021-api.marine-digital.com/route/voyage/" + resultArray.id)
-          //fetch("https://demo2-2021-api.marine-digital.com/route/voyage/1")
+        //fetch("https://demo2-2021-api.marine-digital.com/route/voyage/15")
           .then(resp => resp.json())
           .then(json => {
             spinner.setAttribute('hidden', '');
@@ -464,7 +464,8 @@ function waySearchFunc() {
 
 
 //TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-fetch("test_data/test1.json")
+//fetch("test_data/test1.json")
+fetch("https://demo2-2021-api.marine-digital.com/route/voyage/16")
   .then(resp => resp.json())
   .then(json => {
     spinner.setAttribute('hidden', '');
