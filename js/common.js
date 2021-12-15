@@ -481,15 +481,15 @@ function buildRoutes(data) {
   })
   allRoutes.length = 0;
 
-  data.routes.forEach((routeData, index) => {
-    addRoute(routeData, data.voyage, index)
+  data.routes.forEach((routeData) => {
+    addRoute(routeData, data.voyage)
   })
 }
 
 
 
-function addRoute(data, voyage, index) {
-
+function addRoute(data, voyage) {
+  console.log('data', data);
   let snakeLine;
   const geojsonGroup = new L.LayerGroup();
   geojsonGroup.addTo(map);
@@ -497,8 +497,9 @@ function addRoute(data, voyage, index) {
   if (snakeLine) snakeLine.remove();
 
   const path = (data.route_type === "basic") ? data.json.paths[0].points : data.json.routes[0].points
-
   if (path.length === 0) return;
+
+  console.log('path', path);
 
   let snakeColor = "red"
   let pathColor = "gray"
@@ -546,6 +547,8 @@ function addRoute(data, voyage, index) {
       <div class="item">Total distance: ${data.distance}</div>
     </div>
   `
+  const popup = L.popup({ offset: [0, -5] });
+  popup.setContent(popupText);
 
   //1. snake line over main path 
   const pline = getCoordinatesFromPoints(path)
@@ -564,42 +567,31 @@ function addRoute(data, voyage, index) {
     style: myStyle,
   })
   geojson.eachLayer(function (layer) {
-    var popup = L.popup({
-      offset: [0, -5]
-    });
-    popup.setContent(popupText);
 
     layer.bindPopup(popup);
     layer.on('mouseover', function (e) {
       const segment = hightlightSegment(findClosestPoint(coords, e))
-      console.log('segment', segment);
-
-      const add = path[segment.index + 1]?.properties
-      console.log('add', add);
-
-      var popup = e.target.getPopup();
-      popup.setContent(popupText + `
-        <div><b>From API</b></div>
-        <div>Distance: ${add.distance}</div>
-        <div>Bearing: ${add.course}</div>
-        <div>Calculated</div>
-        <div>Distance: ${segment.pathDistance}</div>
-        <div>Bearing: ${segment.bearing}</div>
-      `);
-      popup.setLatLng(e.latlng).openOn(map);
-
+      const segmentData = path[segment.index + 1]?.properties
+      setPopupContent(e, segmentData, popupText)
     });
+
     layer.on('mouseout', function (e) {
       e.target.closePopup();
+      hightlightSegment()
     });
-    // update popup location
+
     layer.on('mousemove', function (e) {
       popup.setLatLng(e.latlng).openOn(map);
-      hightlightSegment(findClosestPoint(coords, e))
+      const segment = hightlightSegment(findClosestPoint(coords, e))
+      const segmentData = path[segment.index + 1]?.properties
+      setPopupContent(e, segmentData, popupText)
     });
-    // layer.on('click', function (e) {
-    //   hightlightSegment(findClosestPoint(coords, e))
-    // });
+    layer.on('click', function (e) {
+      const segment = hightlightSegment(findClosestPoint(coords, e))
+      const segmentData = path[segment.index + 1]?.properties
+      setPopupContent(e, segmentData, popupText, true)
+
+    });
   });
   geojsonGroup.addLayer(geojson);
 
@@ -617,21 +609,53 @@ function addRoute(data, voyage, index) {
   })
 }
 
+function setPopupContent(e, data, popupText, showWeather) {
+  var popup = e.target.getPopup();
+  const weatherTable = showWeather ? buildWeatherTable(data) : "";
+  popup.setContent(popupText + `
+    <div><b>API Data</b></div>
+    <div>Distance: ${data.distance}</div>
+    <div>Bearing: ${data.course}</div>
+    ${weatherTable}
+  `);
+  popup.setLatLng(e.latlng).openOn(map);
+}
+
+function buildWeatherTable(data) {
+  if (!data || !data.weatherElements) return;
+
+  const rows = data.weatherElements.map(weather => {
+    return `<tr>
+      <td>${weather.element}<td>
+      <td>${weather.avg}<td>
+      <td>${weather.max}<td>
+      <td>${weather.min}<td>
+    </tr>`
+  }).join("")
+  const table = `<table class="weatherData">
+    <tr>
+      <th>element</th>
+      <th>avg</th>
+      <th>max</th>
+      <th>min</th>
+    </tr>
+    ${rows}
+  </table>`;
+  return table;
+}
+
 let hSegment;
-
 function hightlightSegment(segment) {
+  if (!segment) { hSegment.remove(); return; }
   if (hSegment) hSegment.remove();
-  // console.log('segment', segment);
   const line = turf.lineString(segment.coord)
-  var myStyle = {
-    "color": "blue",
-    "weight": 12,
-    "opacity": 1
-  };
   hSegment = L.geoJSON(line, {
-    style: myStyle,
+    style: {
+      "color": "blue",
+      "weight": 12,
+      "opacity": 1
+    },
   }).addTo(map)
-
   hSegment.bringToBack()
   return segment
 }
@@ -698,7 +722,7 @@ function toggleRoute(type) {
     route.visible = false;
   } else {
     route.route.addTo(map);
-    route.snake.addTo(map).snakeIn();
+    route.snake.addTo(map)._snake();
     console.log('route.snake', route.snake);
     route.visible = true;
   }
