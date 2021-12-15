@@ -423,8 +423,6 @@ function waySearchFunc() {
 
   var myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
-
-
   //shipowner=1&vessel=1&port_from=LVRIX-2471&port_to=NLRTM-1276&etd=2021-12-13T14%3A11%3A18.973Z&eta=2021-12-30T14%3A11%3A18.973Z
   var urlencoded = new URLSearchParams();
   urlencoded.append("shipowner", 1);
@@ -433,7 +431,6 @@ function waySearchFunc() {
   urlencoded.append("port_to", wayFromTo.to);
   urlencoded.append("etd", new Date().toISOString());
   urlencoded.append("eta", new Date().toISOString());
-
 
   var requestOptions = {
     method: 'POST',
@@ -455,12 +452,9 @@ function waySearchFunc() {
             buildRoutes(json)
           })
       }
-
     })
     .catch(error => console.log('error', error));
 }
-
-
 
 //TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //fetch("test_data/test1.json")
