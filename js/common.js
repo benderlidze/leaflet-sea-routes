@@ -619,13 +619,17 @@ function buildWeatherTable(data) {
   if (!data || !data.weatherElements) return;
 
   const rows = data.weatherElements.map(weather => {
+    console.log('weather', weather);
     return `<tr>
-      <td>${weather.element}<td>
-      <td>${weather.avg}<td>
-      <td>${weather.max}<td>
-      <td>${weather.min}<td>
+      <td>${weather.element}</td>
+      <td>${weather.avg}</td>
+      <td>${weather.max}</td>
+      <td>${weather.min}</td>
     </tr>`
   }).join("")
+
+  console.log('rows', rows);
+
   const table = `<table class="weatherData">
     <tr>
       <th>element</th>
