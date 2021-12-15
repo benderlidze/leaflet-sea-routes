@@ -1,7 +1,10 @@
-
-
 const resultsDiv = document.getElementById("results");
 const allRoutes = [];
+
+
+var url = new URL(window.location.href);
+const voyageId = url.searchParams.get("voyage");
+
 
 const wayFromTo = {
   from: "",
@@ -181,10 +184,6 @@ allTabClose.addEventListener('click', function allTabCloseFunc() {
   sidebar.hide();
 }, false);
 // end panel open
-
-
-
-
 
 
 var yourApiKey = 'faeeb9b8701d5f1c36c00e9f016cc027';
@@ -449,7 +448,7 @@ function waySearchFunc() {
 
       if (resultArray && +resultArray.id > 0) {
         fetch("https://demo2-2021-api.marine-digital.com/route/voyage/" + resultArray.id)
-        //fetch("https://demo2-2021-api.marine-digital.com/route/voyage/15")
+          //fetch("https://demo2-2021-api.marine-digital.com/route/voyage/15")
           .then(resp => resp.json())
           .then(json => {
             spinner.setAttribute('hidden', '');
@@ -465,7 +464,7 @@ function waySearchFunc() {
 
 //TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //fetch("test_data/test1.json")
-fetch("https://demo2-2021-api.marine-digital.com/route/voyage/16")
+fetch("https://demo2-2021-api.marine-digital.com/route/voyage/" + voyageId)
   .then(resp => resp.json())
   .then(json => {
     spinner.setAttribute('hidden', '');
